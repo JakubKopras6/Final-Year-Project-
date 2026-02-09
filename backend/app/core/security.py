@@ -41,3 +41,33 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     
     return encoded_jwt
+
+
+def decode_access_token(token: str) -> Optional[TokenData]:
+    """
+    Decode and verify JWT token.
+    
+    Args:
+        token: JWT token string
+        
+    Returns:
+        TokenData object if valid, None otherwise
+    """
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id: int = payload.get("user_id")
+        email: str = payload.get("email")
+        company_id: int = payload.get("company_id")
+        role: str = payload.get("role")
+        
+        if user_id is None or email is None:
+            return None
+            
+        return TokenData(
+            user_id=user_id,
+            email=email,
+            company_id=company_id,
+            role=role
+        )
+    except JWTError:
+        return None
